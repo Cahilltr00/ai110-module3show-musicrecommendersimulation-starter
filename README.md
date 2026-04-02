@@ -22,12 +22,16 @@ Explain your design in plain language.
 Some prompts to answer:
 
 - What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+   -> For a "feel" of a song, genre + mood will be the features of a song used and for a more objective (numerical) measurement I'll be using energy + valence + danceability + acousticness.
 
-You can include a simple diagram or bullet list if helpful.
+- What information does your `UserProfile` store
+   -> In the users profile data will be grouped into the two distinctions stated above. For "feel" there will be a favorite_genre and ""_mood fields and for numerical scoring target_energy & likes_acoustic (boolean) will be used as measuring tools.
+
+- How does your `Recommender` compute a score for each song
+    -> Taking the distance between 1 and the users preference for energy will give the program a numerical score to each song.
+
+- How do you choose which songs to recommend
+    -> Taking the distance between user preference and song score will allow the program to score each song and matching the "feel" attributes to the stored users preferences will allow the program to rank the list of scored songs.
 
 ---
 
