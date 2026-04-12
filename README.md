@@ -22,16 +22,39 @@ Explain your design in plain language.
 Some prompts to answer:
 
 - What features does each `Song` use in your system
-   -> For a "feel" of a song, genre + mood will be the features of a song used and for a more objective (numerical) measurement I'll be using energy + valence + danceability + acousticness.
+  -> For a "feel" of a song, genre + mood will be the features of a song used and for a more objective (numerical) measurement I'll be using energy + valence + danceability + acousticness.
 
 - What information does your `UserProfile` store
-   -> In the users profile data will be grouped into the two distinctions stated above. For "feel" there will be a favorite_genre and ""_mood fields and for numerical scoring target_energy & likes_acoustic (boolean) will be used as measuring tools.
+  -> In the users profile data will be grouped into the two distinctions stated above. For "feel" there will be a favorite_genre and ""\_mood fields and for numerical scoring target_energy & likes_acoustic (boolean) will be used as measuring tools.
 
 - How does your `Recommender` compute a score for each song
-    -> Taking the distance between 1 and the users preference for energy will give the program a numerical score to each song.
+  -> Taking the distance between 1 and the users preference for energy will give the program a numerical score to each song.
 
 - How do you choose which songs to recommend
-    -> Taking the distance between user preference and song score will allow the program to score each song and matching the "feel" attributes to the stored users preferences will allow the program to rank the list of scored songs.
+  -> Taking the distance between user preference and song score will allow the program to score each song and matching the "feel" attributes to the stored users preferences will allow the program to rank the list of scored songs.
+
+  Final algorithm:
+  score = 0.0
+
+         1. if song["genre"] == user_prefs["favorite_genre"]:
+               score += 2.0
+
+         2. if song["mood"] == user_prefs["favorite_mood"]:
+               score += 1.5
+
+         3. energy_delta = abs(song["energy"] - user_prefs["target_energy"])
+            score -= energy_delta          # penalty: 0.0 (perfect) to –1.0 (worst)
+
+         4. if user_prefs["likes_acoustic"] and song["acousticness"] > 0.5:
+               score += 1.0
+
+         → yield (song, score, explanation)
+         Then sort descending by score, slice first k
+
+  It has some biases against hip-hop genre as it scores well on genre but poorly on acoustic, chill/acousitc lofi songs will score well on mood + acoustic but miss on genre.
+
+  Snap shot of default profile output:
+  ![alt text](default_output.png)
 
 ---
 
@@ -45,6 +68,8 @@ Some prompts to answer:
    python -m venv .venv
    source .venv/bin/activate      # Mac or Linux
    .venv\Scripts\activate         # Windows
+
+   ```
 
 2. Install dependencies
 
@@ -105,12 +130,11 @@ Write 1 to 2 paragraphs here about what you learned:
 - about how recommenders turn data into predictions
 - about where bias or unfairness could show up in systems like this
 
-
 ---
 
 ## 7. `model_card_template.md`
 
-Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}  
+Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}
 
 ```markdown
 # 🎧 Model Card - Music Recommender Simulation
@@ -162,6 +186,7 @@ Describe your dataset.
 Where does your recommender work well
 
 You can think about:
+
 - Situations where the top results "felt right"
 - Particular user profiles it served well
 - Simplicity or transparency benefits
@@ -173,6 +198,7 @@ You can think about:
 Where does your recommender struggle
 
 Some prompts:
+
 - Does it ignore some genres or moods
 - Does it treat all users as if they have the same taste shape
 - Is it biased toward high energy or one genre by default
@@ -185,6 +211,7 @@ Some prompts:
 How did you check your system
 
 Examples:
+
 - You tried multiple user profiles and wrote down whether the results matched your expectations
 - You compared your simulation to what a real app like Spotify or YouTube tends to recommend
 - You wrote tests for your scoring logic
@@ -212,4 +239,4 @@ A few sentences about what you learned:
 - What surprised you about how your system behaved
 - How did building this change how you think about real music recommenders
 - Where do you think human judgment still matters, even if the model seems "smart"
-
+```

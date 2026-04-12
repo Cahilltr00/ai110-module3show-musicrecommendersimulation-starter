@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Music Recommender — Data Flow</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 { color: #a78bfa; margin-bottom: 0.25rem; }
+    p  { color: #888; margin-top: 0; margin-bottom: 2rem; }
+    .mermaid { background: #1a1a2e; border-radius: 12px; padding: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>Music Recommender — Data Flow</h1>
+  <p>input → process (scoring loop) → output (top-k ranking)</p>
+
+  <div class="mermaid">
+flowchart TD
+    subgraph INPUT["INPUT — user_prefs"]
+        A["favorite_genre : 'hip-hop'\nfavorite_mood   : 'chill'\ntarget_energy   :  0.6\nlikes_acoustic  :  True"]
+    end
+
+    subgraph CSV["DATA SOURCE — data/songs.csv"]
+        B["id · title · artist · genre\nmood · energy · tempo_bpm\nvalence · danceability · acousticness"]
+    end
+
+    INPUT  -->|"passed to"| LOAD
+    CSV    -->|"read by"| LOAD
+
+    LOAD["load_songs(csv_path)\n─────────────────────\ncsv.DictReader — row by row\nreturns List[Dict]"]
+
+    LOAD -->|"List[Dict] — all songs"| LOOP
+
+    subgraph LOOP["PROCESS — recommend_songs()  ·  for each song"]
+        direction TB
+        S0["score = 0.0"] --> G
+        G{"genre ==\nfavorite_genre?"}
+        G -->|"Yes → +points"| M
+        G -->|"No"| M
+        M{"mood ==\nfavorite_mood?"}
+        M -->|"Yes → +points"| E
+        M -->|"No"| E
+        E["energy_delta = abs(song.energy − target_energy)\nscore −= energy_delta  (penalty)"]
+        E --> AC
+        AC{"likes_acoustic AND\nacousticness high?"}
+        AC -->|"Yes → +bonus"| R
+        AC -->|"No"| R
+        R["append\n(song, score, explanation)"]
+    end
+
+    LOOP -->|"List[(song, score, explanation)]"| RANK
+
+    RANK["RANKING\n──────────────────────────\nsorted(results, key=score, reverse=True)\nresults[:k]  →  top-k items"]
+
+    RANK -->|"top-k results"| OUT
+
+    subgraph OUT["OUTPUT"]
+        P["for song, score, explanation in top_k:\n    print(title — Score: X.XX)\n    print(Because: explanation)"]
+    end
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: "dark" });
+  </script>
+</body>
+</html>

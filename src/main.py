@@ -26,8 +26,8 @@ def main() -> None:
     songs = load_songs("data/songs.csv") 
 
     # Starter example profile
-    # user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
-    user_prefs = {"favorite_genre": "hip-hop", "favorite_mood": "chill", "target_energy": 0.6, "likes_acoustic": True}
+    user_prefs = {"favorite_genre": "pop", "favorite_mood": "happy", "target_energy": 0.8, "likes_acoustic": True}
+    user_prefs_2 = {"favorite_genre": "hip-hop", "favorite_mood": "chill", "target_energy": 0.6, "likes_acoustic": True}
     # The proposed user preference profile tests the recommender with:
 
     # - **favorite_genre**: "hip-hop" - tests genre-based filtering
@@ -39,14 +39,18 @@ def main() -> None:
 
     recommendations = recommend_songs(user_prefs, songs, k=5)
 
-    print("\nTop recommendations:\n")
-    for rec in recommendations:
-        # You decide the structure of each returned item.
-        # A common pattern is: (song, score, explanation)
-        song, score, explanation = rec
-        print(f"{song['title']} - Score: {score:.2f}")
-        print(f"Because: {explanation}")
-        print()
+    print("\n" + "=" * 44)
+    print("   TOP MUSIC RECOMMENDATIONS")
+    print("=" * 44)
+
+    for rank, (song, score, explanation) in enumerate(recommendations, start=1):
+        print(f"\n#{rank}  {song['title']} — {song['artist']}")
+        print(f"    Score : {score:.2f} / 10.00")
+        print(f"    Genre : {song['genre']}  |  Mood: {song['mood']}")
+        print("    Why   :")
+        for reason in explanation.split(", "):
+            print(f"            • {reason}")
+        print("-" * 44)
 
 
 if __name__ == "__main__":
