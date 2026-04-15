@@ -82,7 +82,7 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
         score += 3.0
         reasons.append("mood match (+3.0)")
 
-    # Energy proximity — up to 2.0 pts (continuous)
+    # Energy proximity — up to 4.0 pts (continuous, doubled weight)
     energy_points = 2.0 * (1 - abs(song["energy"] - user_prefs["target_energy"]))
     score += energy_points
     reasons.append(f"energy proximity (+{energy_points:.2f})")
